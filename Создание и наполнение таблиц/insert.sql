@@ -1,3 +1,11 @@
+-- сбрасываем счетчик
+SELECT setval('currencies_id_seq', 1, false);
+SELECT setval('balance_types_id_seq', 1, false);
+SELECT setval('transaction_types_id_seq', 1, false);
+SELECT setval('balances_id_seq', 1, false);
+SELECT setval('transactions_id_seq', 1, false);
+-- end
+
 INSERT INTO currencies (name) VALUES
     ('Поинты'),
     ('Бонусы') RETURNING id, name;
