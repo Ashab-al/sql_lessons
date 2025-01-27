@@ -13,9 +13,7 @@ CREATE TABLE transactions (
   	quantity int NOT NULL, 
     balance_id bigint NOT NULL, 
     transaction_type_id bigint NOT NULL, 
-    currency_id bigint NOT NULL,
-    created_at date NOT NULL,
-    updated_at date NOT NULL
+    currency_id bigint NOT NULL
 );
 
 CREATE TABLE transaction_types(
