@@ -6,9 +6,7 @@ SELECT setval('balances_id_seq', 1, false);
 SELECT setval('transactions_id_seq', 1, false);
 -- end
 
-INSERT INTO currencies (name) VALUES
-    ('Поинты'),
-    ('Бонусы'), ('RUB'), ('USD'), ('STARS'), ('EUR') RETURNING id, name;
+INSERT INTO currencies (name) VALUES ('Поинты'), ('Бонусы') RETURNING id, name;
     
 INSERT INTO balance_types (name) VALUES
     ('Основной счет'),
@@ -22,7 +20,6 @@ INSERT INTO transaction_types (name) VALUES
 INSERT INTO balances (balances_type_id) VALUES
     (1),(2),(1),(2),(1),(2),(1),(2),(1),(2);
  
--- транзакции на пополнения счета lastval()
 -- транзакции на пополнения счета lastval()
 INSERT INTO transactions (quantity, balance_id, transaction_type_id, currency_id) VALUES
 	-- пополнение основного счета
@@ -56,37 +53,33 @@ INSERT INTO transactions (quantity, balance_id, transaction_type_id, currency_id
     -- RETURNING id, quantity, balance_id, transaction_type_id, currency_id;
 
 -- 
+INSERT INTO currencies (name) VALUES ('RUB'), ('USD'), ('STARS'), ('EUR') RETURNING id, name;
+	
+    
 ALTER TABLE transactions ADD COLUMN created_at date;
 ALTER TABLE transactions ADD COLUMN updated_at date;
 
 UPDATE transactions
-SET created_at = CURRENT_DATE - 365
+SET created_at = CURRENT_DATE - 365,
+    updated_at = CURRENT_DATE - 365
 where id IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
 RETURNING *;
 
-UPDATE transactions
-SET updated_at = CURRENT_DATE - 365
-where id IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
-RETURNING *;
 -- 
 UPDATE transactions
-SET updated_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', currval('transactions_id_seq') + 1)::interval)
-where id NOT IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
-RETURNING updated_at;
-
-UPDATE transactions
-SET created_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', currval('transactions_id_seq') + 1)::interval)
+SET updated_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', lastval() + 1)::interval), 
+	created_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', lastval() + 1)::interval)
 where id NOT IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
 RETURNING *;
 
--- -- Выбрать все транзакции с суммой больше 100 (слишком много выводится и я сделал больше 950)
--- select * from transactions WHERE quantity > 950;
+-- Выбрать все транзакции с суммой больше 100 (слишком много выводится и я сделал больше 950)
+select * from transactions WHERE quantity > 950;
 
--- -- Выбрать все нулевые транзакции за прошедшую неделю
--- select * from transactions 
--- WHERE (created_at >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') and
---       created_at < date_trunc('week', CURRENT_TIMESTAMP) and quantity = 0);
+-- Выбрать все нулевые транзакции за прошедшую неделю
+select * from transactions 
+WHERE (created_at >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') and
+      created_at < date_trunc('week', CURRENT_TIMESTAMP) and quantity = 0);
 
--- -- вывести первые пять наименований валют 
--- select * from currencies ORDER BY id ASC
--- LIMIT 5;
+-- вывести первые пять наименований валют 
+select * from currencies ORDER BY id ASC
+LIMIT 5;
