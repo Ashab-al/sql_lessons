@@ -55,23 +55,6 @@ INSERT INTO transactions (quantity, balance_id, transaction_type_id, currency_id
 -- 
 INSERT INTO currencies (name) VALUES ('RUB'), ('USD'), ('STARS'), ('EUR') RETURNING id, name;
 	
-    
-ALTER TABLE transactions ADD COLUMN created_at date;
-ALTER TABLE transactions ADD COLUMN updated_at date;
-
-UPDATE transactions
-SET created_at = CURRENT_DATE - 365,
-    updated_at = CURRENT_DATE - 365
-where id IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
-RETURNING *;
-
--- 
-UPDATE transactions
-SET updated_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', lastval() + 1)::interval), 
-	created_at = date_add(CURRENT_DATE - 365, FORMAT('%s days', lastval() + 1)::interval)
-where id NOT IN (select transactions.id from transactions ORDER BY id ASC LIMIT 10)
-RETURNING *;
-
 -- Выбрать все транзакции с суммой больше 100 (слишком много выводится и я сделал больше 950)
 select * from transactions WHERE quantity > 950;
 
