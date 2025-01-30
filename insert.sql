@@ -6,9 +6,7 @@ SELECT setval('balances_id_seq', 1, false);
 SELECT setval('transactions_id_seq', 1, false);
 -- end
 
-INSERT INTO currencies (name) VALUES
-    ('Поинты'),
-    ('Бонусы') RETURNING id, name;
+INSERT INTO currencies (name) VALUES ('Поинты'), ('Бонусы') RETURNING id, name;
     
 INSERT INTO balance_types (name) VALUES
     ('Основной счет'),
@@ -22,7 +20,7 @@ INSERT INTO transaction_types (name) VALUES
 INSERT INTO balances (balances_type_id) VALUES
     (1),(2),(1),(2),(1),(2),(1),(2),(1),(2);
  
--- транзакции на пополнения счета
+-- транзакции на пополнения счета lastval()
 INSERT INTO transactions (quantity, balance_id, transaction_type_id, currency_id) VALUES
 	-- пополнение основного счета
     (floor(random() * 1000), 1, 1, 1), (floor(random() * 1000), 3, 1, 1), (floor(random() * 1000), 5, 1, 1), (floor(random() * 1000), 7, 1, 1), (floor(random() * 1000), 9, 1, 1),
@@ -50,6 +48,21 @@ INSERT INTO transactions (quantity, balance_id, transaction_type_id, currency_id
     (floor(random() * 1000), 2, 2, 2), (floor(random() * 1000), 4, 2, 2), (floor(random() * 1000), 6, 2, 2), (floor(random() * 1000), 8, 2, 2), (floor(random() * 1000), 10, 2, 2),
     (floor(random() * 1000), 2, 2, 2), (floor(random() * 1000), 4, 2, 2), (floor(random() * 1000), 6, 2, 2), (floor(random() * 1000), 8, 2, 2), (floor(random() * 1000), 10, 2, 2),
     (floor(random() * 1000), 2, 2, 2), (floor(random() * 1000), 4, 2, 2), (floor(random() * 1000), 6, 2, 2), (floor(random() * 1000), 8, 2, 2), (floor(random() * 1000), 10, 2, 2),
-    (floor(random() * 1000), 2, 2, 2), (floor(random() * 1000), 4, 2, 2), (floor(random() * 1000), 6, 2, 2), (floor(random() * 1000), 8, 2, 2), (floor(random() * 1000), 10, 2, 2)
+    (floor(random() * 1000), 2, 2, 2), (floor(random() * 1000), 4, 2, 2), (floor(random() * 1000), 6, 2, 2), (floor(random() * 1000), 8, 2, 2), (floor(random() * 1000), 10, 2, 2);
     
-    RETURNING id, quantity, balance_id, transaction_type_id, currency_id;
+    -- RETURNING id, quantity, balance_id, transaction_type_id, currency_id;
+
+-- 
+INSERT INTO currencies (name) VALUES ('RUB'), ('USD'), ('STARS'), ('EUR') RETURNING id, name;
+	
+-- Выбрать все транзакции с суммой больше 100 (слишком много выводится и я сделал больше 950)
+select * from transactions WHERE quantity > 950;
+
+-- Выбрать все нулевые транзакции за прошедшую неделю
+select * from transactions 
+WHERE (created_at >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') and
+      created_at < date_trunc('week', CURRENT_TIMESTAMP) and quantity = 0);
+
+-- вывести первые пять наименований валют 
+select * from currencies ORDER BY id ASC
+LIMIT 5;
