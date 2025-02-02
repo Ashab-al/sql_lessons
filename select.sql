@@ -24,13 +24,11 @@ NOT EXISTS (
 
 -- Вывести рублевые транзакции заданного типа по балансам заданного типа
 select * from transactions
-WHERE 
-NOT EXISTS (select currencies.id from currencies where currencies.name != 'RUB' and transactions.currency_id = currencies.id)
-and 
-NOT EXISTS (select transaction_types.id from transaction_types where transaction_types.name != 'Пополнение' and transactions.transaction_type_id = transaction_types.id)
-and
-EXISTS (select balances.id from balances 
-        where balances.balances_type_id = (
-          select balance_types.id from balance_types where balance_types.name = 'Основной счет'
-          ) and balances.id = transactions.balance_id
-          )
+where 
+transactions.currency_id = (select currencies.id from currencies where currencies.name = 'RUB')
+and transactions.transaction_type_id = (select transaction_types.id from transaction_types where transaction_types.name = 'Пополнение')
+and transactions.balance_id IN (
+	select balances.id from balances where balances.balances_type_id = (
+    	select balance_types.id from balance_types where balance_types.name = 'Основной счет'
+    )
+);
